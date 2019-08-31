@@ -32,7 +32,6 @@
 #include "zbar_ros/barcode_reader_nodelet.h"
 #include "pluginlib/class_list_macros.h"
 #include "std_msgs/String.h"
-#include <unistd.h>
 
 namespace zbar_ros
 {
@@ -47,7 +46,7 @@ namespace zbar_ros
     nh_ = getNodeHandle();
     private_nh_ = getPrivateNodeHandle();
 
-    barcode_pub_ = nh_.advertise<std_msgs::String>("/recognizer_1/output", 10,
+    barcode_pub_ = nh_.advertise<std_msgs::String>("sara_command", 10,
         boost::bind(&BarcodeReaderNodelet::connectCb, this),
         boost::bind(&BarcodeReaderNodelet::disconnectCb, this));
     
@@ -62,7 +61,7 @@ namespace zbar_ros
     if (!camera_sub_ && barcode_pub_.getNumSubscribers() > 0)
     {
       NODELET_INFO("Connecting to camera topic.");
-      camera_sub_ = nh_.subscribe("image", 10, &BarcodeReaderNodelet::imageCb, this);
+      camera_sub_ = nh_.subscribe("/head_xtion/rgb/image_raw", 10, &BarcodeReaderNodelet::imageCb, this);
     }
   }
 
@@ -117,6 +116,8 @@ namespace zbar_ros
       barcode_pub_.publish(barcode_string);
       sleep(3);
     }
+
+    zbar_image.set_data(NULL, 0);
   }
 
   void BarcodeReaderNodelet::cleanCb()
@@ -134,4 +135,4 @@ namespace zbar_ros
   }
 }  // namespace zbar_ros
 
-PLUGINLIB_DECLARE_CLASS(zbar_ros, BarcodeReaderNodelet, zbar_ros::BarcodeReaderNodelet, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(zbar_ros::BarcodeReaderNodelet, nodelet::Nodelet);
